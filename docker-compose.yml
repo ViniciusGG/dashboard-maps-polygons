@@ -1,14 +1,14 @@
 # For more information: https://laravel.com/docs/sail
 version: '3'
 services:
-    azulfyapi:
-        container_name: azulfy_api
+    mapapi:
+        container_name: map_api
         build:
             context: ./docker/8.2
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: azulfy_api-8.2/app
+        image: map_api-8.2/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -21,13 +21,13 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - azulfy
+            - map
         depends_on:
-            - azulfymysql
-            - azulfy_redis
+            - mapmysql
+            - map_redis
 
-    azulfymysql:
-        container_name: azulfy_mysql
+    mapmysql:
+        container_name: map_mysql
         image: 'mysql:8.0'
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
@@ -38,22 +38,22 @@ services:
             MYSQL_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
         volumes:
-            - 'azulfymysql:/var/lib/mysql'
+            - 'mapmysql:/var/lib/mysql'
         networks:
-            - azulfy
+            - map
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
             timeout: 5s
-    azulfy_redis:
-        container_name: azulfy_redis
+    map_redis:
+        container_name: map_redis
         image: 'redis:alpine'
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
             - 'sailredis:/data'
         networks:
-            - azulfy
+            - map
         healthcheck:
             test: [ "CMD", "redis-cli", "ping" ]
             retries: 3
@@ -64,12 +64,12 @@ services:
             - '${FORWARD_MAILHOG_PORT:-1025}:1025'
             - '${FORWARD_MAILHOG_DASHBOARD_PORT:-8025}:8025'
         networks:
-            - azulfy
+            - map
 networks:
-    azulfy:
+    map:
         driver: bridge
 volumes:
-    azulfymysql:
+    mapmysql:
         driver: local
     sailredis:
         driver: local
